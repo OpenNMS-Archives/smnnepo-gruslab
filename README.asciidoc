@@ -1,0 +1,40 @@
+Gru's Lab is a testing and demonstration environment for +SMNepO+.
+It simulates a complex network with a central +OpenNMS+ instance and multiple sites having seperated infrastructure and services.
+
+
+== Technical overview
+The environment is simulated virtual machines controlled by http://vagrantup.com[vagrant].
+Vagrant is responsible for creating and provisioning the machines and create and wire-up the virtual network.
+
+To simulate the network, internal-only networks between the virtual machines are used.
+These networks are not accesible from the host and allow isulation of the transmited data.
+
+For wiring the different networks, a special virtual machine called +router+ is used.
+The router is responsible for passing traffic between the networks.
+
+
+== Network overview
+The +core+ network contains the central +OpenNMS+ instance and is reachable by all sites via the +router+.
+
+For each site, a seperate site network exists.
+These networks contains a +SMNnepO+ +Minion+ instance which is able to communicate with the central +OpenNMS+ instance via the +router+.
+
+
+== Usage
+NOTE: All commands must be executed from the project folder.
+
+
+=== Starting
+To start the whole lab with all machines, the following command can be used:
+
+----
+vagrant up
+----
+
+
+=== Stoping
+To shut down all machines from the lab, the following command can be used:
+
+----
+vagrant destroy -f
+----
