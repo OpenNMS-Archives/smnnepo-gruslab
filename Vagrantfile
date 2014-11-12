@@ -4,7 +4,9 @@
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
-MINIONS = (1..3)
+MINIONS = (1..1)
+
+NODES = (1..1)
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
@@ -12,35 +14,62 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define "opennms" do |opennms|
     opennms.vm.box = "hashicorp/precise32"
-
     opennms.vm.synced_folder "opennms", "/opt/provisioning"
+    opennms.vm.network "private_network", ip: "192.168.0.2", intnet:"noc"
 
-    opennms.vm.network "private_network", ip: "192.168.0.2", intnet:"core"
+    config.vm.provider "virtualbox" do |vb|
+      vb.name = "smnnepo-gruslab-opennms"
+    end
   end
 
   config.vm.define "router" do |router|
     router.vm.box = "hashicorp/precise32"
-
     router.vm.synced_folder "router", "/opt/provisioning"
+    router.vm.network "private_network", ip: "192.168.0.1", intnet:"noc"
 
-    router.vm.network "private_network", ip: "192.168.0.1", intnet:"core"
-
-    MINIONS.each do |i|
-      router.vm.network "private_network", ip: "192.168.#{i}.1", intnet:"shop-#{i}"
+    config.vm.provider "virtualbox" do |vb|
+      vb.name = "smnnepo-gruslab-router"
     end
 
-    router.vm.provision "shell", inline: "sudo sh /opt/provisioning/bootstrap.sh"
+    MINIONS.each do |i|
+      router.vm.network "private_network", ip: "192.168.#{i}.1", intnet:"store-#{i}"
+    end
+
+    router.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh"
   end
 
+  # we have one minion per store
   MINIONS.each do |i|
-    config.vm.define "minion-#{i}" do |minion|
+    config.vm.define "store#{i}-minion" do |minion|
       minion.vm.box = "hashicorp/precise32"
-
       minion.vm.synced_folder "minion", "/opt/provisioning"
+      minion.vm.network "private_network", ip: "192.168.#{i}.2", intnet:"store-#{i}"
+      minion.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh #{i}"
 
-      minion.vm.network "private_network", ip: "192.168.#{i}.2", intnet:"shop-#{i}"
+      config.vm.provider "virtualbox" do |vb|
+        vb.name = "smnnepo-gruslab-store#{i}-minion"
+        vb.customize ["modifyvm", :id, "--memory", "256"]
+      end
+    end
 
-      minion.vm.provision "shell", inline: "sudo sh /opt/provisioning/bootstrap.sh #{i}"
+    # So for each minion we build n nodes
+    NODES.each do |a|
+      config.vm.define "store#{i}-node#{a}" do |node|
+        node.vm.box = "hashicorp/precise32"
+        node.vm.synced_folder "node", "/opt/provisioning"
+        node.vm.network "private_network", ip: "192.168.#{i}.#{2+a}", intnet:"store-#{i}"
+
+        config.vm.provider "virtualbox" do |vb|
+          vb.name = "smnnepo-gruslab-store#{i}-node#{a}"
+          vb.customize ["modifyvm", :id, "--memory", "128"]
+        end
+
+        # we really should do this with chef
+        # node.vm.provision "shell", inline: "pacman -Sy"
+        # node.vm.provision "shell", inline: "pacman -S --noconfirm jdk7-openjdk"
+        # node.vm.provision "shell", inline: "pacman -S --noconfirm net-snmp"
+        node.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh #{i} #{a}"
+      end
     end
   end
 

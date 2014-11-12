@@ -1,6 +1,6 @@
 #! /bin/bash
 
-echo "STORE $1 MINION BOOTSTRAPPING!!!!!"
+echo "STORE $1 NODE $2 BOOTSTRAPPING!!!!!"
 
 # Configure routes
 cat > /etc/network/if-up.d/route-add << EOF
