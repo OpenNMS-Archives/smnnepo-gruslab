@@ -1,6 +1,33 @@
+= Gru's Lab
+:icons: font
+
 Gru's Lab is a testing and demonstration environment for +SMNepO+.
 It simulates a complex network with a central +OpenNMS+ instance and multiple sites having seperated infrastructure and services.
 
+== Functional overview
+The following figure describes the test scenario to simulate.
+
+image:images/overview.png[Overview ]
+
+=== The Network Operation Center (NOC)
+ * Runs an OpenNMS instance
+ * Uses ActiveMQ as a messaging server
+
+=== The Store
+ * Runs up to 10 nodes
+ * Runs one minion (to manage all nodes)
+ * Needs a VPN connection to the NOC (reserved)
+ * Needs a "public" connection to the internet
+ * A node is not reachable from the outside (E.g. the internet or the NOC)
+ * All nodes within a store can see/ping each other.
+
+If there are multiple stores, each store is build exactly the same (even the ip addresses match).
+
+Each node must run
+
+  * snmp agent
+  * some java application to collect jmx data
+  * send traps to NOC
 
 == Technical overview
 The environment is simulated virtual machines controlled by http://vagrantup.com[vagrant].
