@@ -1,6 +1,6 @@
 #! /bin/bash
 
-echo "ROUTER BOOTSTRAPPING!!!!!"
+echo "STORE $1 ROUTER BOOTSTRAPPING!!!!!"
 
 # No questions from apt
 export DEBIAN_FRONTEND=noninteractive
@@ -15,6 +15,15 @@ net.ipv6.conf.all.forwarding = 1
 EOF
 sysctl -p -
 
+# Configure routes
+cat > /etc/network/if-up.d/route-add << EOF
+#!/bin/sh
+ip route add 10.10.10.0/24 via 172.16.$1.1
+EOF
+
+chmod 755 /etc/network/if-up.d/route-add
+
+ip route add 10.10.10.0/24 via 172.16.$1.1
 
 # Configure firewall
 ## By default nothing can pass through
@@ -35,14 +44,11 @@ iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
-## For each store...
-for x in $(seq 2 $((2 + $1))); do
-  ### Allow connections from store to NOC network
-  iptables -A FORWARD -i "eth${x}" -o "eth1" -j ACCEPT
+## Allow connections from store to transfer network
+iptables -A FORWARD -i "eth2" -o "eth1" -j ACCEPT
 
-  ### Allow answers on established connections
-  iptables -A FORWARD -i "eth1" -o "eth${x}" -m state --state ESTABLISHED,RELATED -j ACCEPT
-done
+## Allow answers on established connections
+iptables -A FORWARD -i "eth1" -o "eth2" -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Save the firewall state
 iptables-save > /etc/iptables/rules.v4
