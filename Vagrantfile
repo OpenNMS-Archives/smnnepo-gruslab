@@ -41,6 +41,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     config.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-router"
+      vb.customize ["modifyvm", :id, "--memory", "128"]
     end
 
     # Start the provisioning
