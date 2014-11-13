@@ -16,7 +16,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     opennms.vm.box = "hashicorp/precise64"
 
     # Assign the VM to the NOC network
-    opennms.vm.network "private_network", ip: "10.10.10.2", intnet:"noc"
+    opennms.vm.network "private_network", ip: "172.16.0.2", intnet:"noc"
 
     config.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-noc-opennms"
@@ -31,13 +31,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "noc-router" do |router|
     router.vm.box = "hashicorp/precise64"
 
-    # Assign the router to the transfer networks to all stores
-    STORES.each do |i|
-      router.vm.network "private_network", ip: "172.16.#{i}.1", netmask: "255.255.255.252", intnet: "transfer#{i}"
-    end
+    # Assign the router to the transfer network
+    router.vm.network "private_network", ip: "10.10.10.254", intnet: "transfer"
 
     # Assign the router to the NOC network
-    router.vm.network "private_network", ip: "10.10.10.1", intnet:"noc"
+    router.vm.network "private_network", ip: "172.16.0.1", intnet:"noc"
 
     config.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-noc-router"
@@ -55,10 +53,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       router.vm.box = "hashicorp/precise64"
 
       # Connect the VM to the transfer network
-      router.vm.network "private_network", ip: "172.16.#{i}.2", netmask: "255.255.255.252", intnet: "transfer#{i}"
+      router.vm.network "private_network", ip: "10.10.10.#{100+i}", intnet: "transfer"
 
       # Connect the router to the store-specific network
-      router.vm.network "private_network", ip: "192.168.#{i}.1", intnet: "store#{i}"
+      router.vm.network "private_network", ip: "192.168.0.1", intnet: "store#{i}"
 
       config.vm.provider "virtualbox" do |vb|
         vb.name = "smnnepo-gruslab-store#{i}-router"
@@ -75,7 +73,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       minion.vm.box = "hashicorp/precise64"
 
       # Assign the VM to the store-specific network
-      minion.vm.network "private_network", ip: "192.168.#{i}.2", intnet:"store#{i}"
+      minion.vm.network "private_network", ip: "192.168.0.2", intnet:"store#{i}"
 
       config.vm.provider "virtualbox" do |vb|
         vb.name = "smnnepo-gruslab-store#{i}-minion"
@@ -88,22 +86,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     # Create nodes for each store
-    NODES.each do |a|
+    NODES.each do |j|
       # Create the node
-      config.vm.define "store#{i}-node#{a}" do |node|
+      config.vm.define "store#{i}-node#{j}" do |node|
         node.vm.box = "hashicorp/precise64"
 
         # Assign the VM to the store-specific network
-        node.vm.network "private_network", ip: "192.168.#{i}.#{2+a}", intnet: "store#{i}"
+        node.vm.network "private_network", ip: "192.168.0.#{100+j}", intnet: "store#{i}"
 
         config.vm.provider "virtualbox" do |vb|
-          vb.name = "smnnepo-gruslab-store#{i}-node#{a}"
+          vb.name = "smnnepo-gruslab-store#{i}-node#{j}"
           vb.customize ["modifyvm", :id, "--memory", "128"]
         end
 
         # Start the provisioning
         node.vm.synced_folder "provisioning/store/node", "/opt/provisioning"
-        node.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh #{i} #{a}"
+        node.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh #{i} #{j}"
       end
     end
   end

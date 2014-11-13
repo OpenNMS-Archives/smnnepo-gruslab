@@ -18,12 +18,12 @@ sysctl -p -
 # Configure routes
 cat > /etc/network/if-up.d/route-add << EOF
 #!/bin/sh
-ip route add 10.10.10.0/24 via 172.16.$1.1
+ip route add 172.16.0.0/24 via 10.10.10.254
 EOF
 
 chmod 755 /etc/network/if-up.d/route-add
 
-ip route add 10.10.10.0/24 via 172.16.$1.1
+ip route add 172.16.0.0/24 via 10.10.10.254
 
 # Configure firewall
 ## By default nothing can pass through

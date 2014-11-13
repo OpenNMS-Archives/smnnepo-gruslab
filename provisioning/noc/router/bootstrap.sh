@@ -32,14 +32,11 @@ iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
-## For each store...
-for x in $(seq 1 $1); do
-  ### Allow connections from transfer to NOC network
-  iptables -A FORWARD -i "eth${x}" -o "eth$(($1 + 1))" -j ACCEPT
+## Allow connections from transfer to NOC network
+iptables -A FORWARD -i "eth1" -o "eth2" -j ACCEPT
 
-  ### Allow answers on established connections
-  iptables -A FORWARD -i "eth$(($1 + 1))" -o "eth${x}" -m state --state ESTABLISHED,RELATED -j ACCEPT
-done
+## Allow answers on established connections
+iptables -A FORWARD -i "eth2" -o "eth1" -j ACCEPT # -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # Save the firewall state
 iptables-save > /etc/iptables/rules.v4
