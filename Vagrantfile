@@ -45,7 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Start the provisioning
     router.vm.synced_folder "router", "/opt/provisioning"
-    router.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh"
+    router.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh #{STORES.count}"
   end
 
   STORES.each do |i|

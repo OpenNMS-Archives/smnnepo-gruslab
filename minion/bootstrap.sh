@@ -2,6 +2,9 @@
 
 echo "STORE $1 MINION BOOTSTRAPPING!!!!!"
 
+# No questions from apt
+export DEBIAN_FRONTEND=noninteractive
+
 # Configure routes
 cat > /etc/network/if-up.d/route-add << EOF
 #!/bin/sh
