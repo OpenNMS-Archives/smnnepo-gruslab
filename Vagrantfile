@@ -17,9 +17,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Assign the VM to the NOC network
     opennms.vm.network "private_network", ip: "192.168.0.2", intnet:"noc"
+    config.vm.network "forwarded_port", guest: 8980, host: 8980
 
     config.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-opennms"
+      # OpenNMS needs more than 1GB RAM
+      vb.customize ["modifyvm", :id, "--memory", "2048"]
     end
 
     # Start the provisioning
