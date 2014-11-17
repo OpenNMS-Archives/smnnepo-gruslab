@@ -13,7 +13,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # The NOC OpenNMS instance
   config.vm.define "opennms" do |opennms|
-    opennms.vm.box = "hashicorp/precise32"
+    opennms.vm.box = "ubuntu/trusty64"
 
     # Assign the VM to the NOC network
     opennms.vm.network "private_network", ip: "192.168.0.2", intnet:"noc"
@@ -29,7 +29,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # The routing infrastructure
   config.vm.define "router" do |router|
-    router.vm.box = "hashicorp/precise32"
+    router.vm.box = "ubuntu/trusty64"
 
     # Assign the VM to the NOC network
     router.vm.network "private_network", ip: "192.168.0.1", intnet:"noc"
@@ -52,7 +52,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   STORES.each do |i|
     # Create one minion per store
     config.vm.define "store#{i}-minion" do |minion|
-      minion.vm.box = "hashicorp/precise32"
+      minion.vm.box = "ubuntu/trusty64"
 
       # Assign the VM to the store-specific network
       minion.vm.network "private_network", ip: "192.168.#{i}.2", intnet:"store-#{i}"
@@ -71,7 +71,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     NODES.each do |a|
       # Create the node
       config.vm.define "store#{i}-node#{a}" do |node|
-        node.vm.box = "hashicorp/precise32"
+        node.vm.box = "ubuntu/trusty64"
 
         # Assign the VM to the store-specific network
         node.vm.network "private_network", ip: "192.168.#{i}.#{2+a}", intnet:"store-#{i}"
