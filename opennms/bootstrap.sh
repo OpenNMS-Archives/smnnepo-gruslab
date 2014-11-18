@@ -20,11 +20,11 @@ if [ ! -f /opt/provisioning/opennms.tar.gz ]; then
     exit 1
 fi
 
-#we need the target directory to exist, otherwise exit
-#if [ ! -d "$OPENNMS_HOME" ]; then
-#    echo "$OPENNMS_HOME does not exist but should."
-#    exit 1;
-#fi
+# create swap file of 2GB (block size 1MB)
+/bin/dd if=/dev/zero of=/swapfile bs=1024 count=2097152
+/sbin/mkswap /swapfile
+/sbin/swapon /swapfile
+/bin/echo '/swapfile          swap            swap    defaults        0 0' >> /etc/fstab
 
 # Fix possible perl:warning: Setting locale failed error
 locale-gen de_DE de_DE.UTF-8
