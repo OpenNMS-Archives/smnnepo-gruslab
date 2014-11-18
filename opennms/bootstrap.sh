@@ -116,4 +116,4 @@ ${OPENNMS_HOME}/bin/runjava -S ${JAVA_HOME}
 ${OPENNMS_HOME}/bin/install -dis
 
 # Start OpenNMS
-${OPENNMS_HOME}/bin/opennms start
+${OPENNMS_HOME}/bin/opennms -Q start
