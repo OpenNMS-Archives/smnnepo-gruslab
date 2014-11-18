@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = "2"
 STORES = (1..1)
 
 # Configure the number of nodes per store
-NODES = (1..1)
+NODES = (1..2)
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
