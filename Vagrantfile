@@ -13,13 +13,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # The NOC OpenNMS instance
   config.vm.define "noc-opennms" do |opennms|
-    opennms.vm.box = "hashicorp/precise64"
+    opennms.vm.box = "ubuntu/trusty64"
 
     # Assign the VM to the NOC network
     opennms.vm.network "private_network", ip: "172.16.0.2", intnet:"noc"
+    config.vm.network "forwarded_port", guest: 8980, host: 8980
 
     config.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-noc-opennms"
+      vb.customize ["modifyvm", :id, "--memory", "2048"]
     end
 
     # Start the provisioning
@@ -29,7 +31,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # The NOC router instance
   config.vm.define "noc-router" do |router|
-    router.vm.box = "hashicorp/precise64"
+    router.vm.box = "ubuntu/trusty64"
 
     # Assign the router to the transfer network
     router.vm.network "private_network", ip: "10.10.10.254", intnet: "transfer"
@@ -70,7 +72,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Create one minion per store
     config.vm.define "store#{i}-minion" do |minion|
-      minion.vm.box = "hashicorp/precise64"
+      minion.vm.box = "ubuntu/trusty64"
 
       # Assign the VM to the store-specific network
       minion.vm.network "private_network", ip: "192.168.0.2", intnet:"store#{i}"
@@ -89,7 +91,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     NODES.each do |j|
       # Create the node
       config.vm.define "store#{i}-node#{j}" do |node|
-        node.vm.box = "hashicorp/precise64"
+        node.vm.box = "ubuntu/trusty64"
 
         # Assign the VM to the store-specific network
         node.vm.network "private_network", ip: "192.168.0.#{100+j}", intnet: "store#{i}"

@@ -1,4 +1,8 @@
 /.vagrant
+
 .idea
 *.iml
+
 .*.swp
+
+/provisioning/noc/opennms/*.tar.gz
