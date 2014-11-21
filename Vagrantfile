@@ -16,10 +16,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     opennms.vm.box = "ubuntu/trusty64"
 
     # Assign the VM to the NOC network
-    opennms.vm.network "private_network", ip: "172.16.0.2", intnet:"noc"
-    config.vm.network "forwarded_port", guest: 8980, host: 8980
+    opennms.vm.network "private_network", ip: "172.16.0.253", intnet:"noc"
+    opennms.vm.network "forwarded_port", guest: 8980, host: 8980
 
-    config.vm.provider "virtualbox" do |vb|
+    opennms.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-noc-opennms"
       vb.customize ["modifyvm", :id, "--memory", "2048"]
     end
@@ -37,9 +37,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     router.vm.network "private_network", ip: "10.10.10.254", intnet: "transfer"
 
     # Assign the router to the NOC network
-    router.vm.network "private_network", ip: "172.16.0.1", intnet:"noc"
+    router.vm.network "private_network", ip: "172.16.0.254", intnet:"noc"
 
-    config.vm.provider "virtualbox" do |vb|
+    router.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-noc-router"
       vb.customize ["modifyvm", :id, "--memory", "128"]
     end
@@ -52,15 +52,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   STORES.each do |i|
     # Create one router per store
     config.vm.define "store#{i}-router" do |router|
-      router.vm.box = "hashicorp/precise64"
+      router.vm.box = "ubuntu/trusty64"
 
       # Connect the VM to the transfer network
-      router.vm.network "private_network", ip: "10.10.10.#{100+i}", intnet: "transfer"
+      router.vm.network "private_network", ip: "10.10.10.#{i}", intnet: "transfer"
 
       # Connect the router to the store-specific network
-      router.vm.network "private_network", ip: "192.168.0.1", intnet: "store#{i}"
+      router.vm.network "private_network", ip: "192.168.0.254", intnet: "store#{i}"
 
-      config.vm.provider "virtualbox" do |vb|
+      router.vm.provider "virtualbox" do |vb|
         vb.name = "smnnepo-gruslab-store#{i}-router"
         vb.customize ["modifyvm", :id, "--memory", "128"]
       end
@@ -75,9 +75,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       minion.vm.box = "ubuntu/trusty64"
 
       # Assign the VM to the store-specific network
-      minion.vm.network "private_network", ip: "192.168.0.2", intnet:"store#{i}"
+      minion.vm.network "private_network", ip: "192.168.0.253", intnet:"store#{i}"
 
-      config.vm.provider "virtualbox" do |vb|
+      minion.vm.provider "virtualbox" do |vb|
         vb.name = "smnnepo-gruslab-store#{i}-minion"
         vb.customize ["modifyvm", :id, "--memory", "256"]
       end
@@ -94,9 +94,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         node.vm.box = "ubuntu/trusty64"
 
         # Assign the VM to the store-specific network
-        node.vm.network "private_network", ip: "192.168.0.#{100+j}", intnet: "store#{i}"
+        node.vm.network "private_network", ip: "192.168.0.#{j}", intnet: "store#{i}"
 
-        config.vm.provider "virtualbox" do |vb|
+        node.vm.provider "virtualbox" do |vb|
           vb.name = "smnnepo-gruslab-store#{i}-node#{j}"
           vb.customize ["modifyvm", :id, "--memory", "128"]
         end
@@ -108,3 +108,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 end
+
