@@ -88,4 +88,6 @@ ${OPENNMS_HOME}/bin/opennms start
 
 # Setup Minion Server
 chmod +x /opt/provisioning/karafWrapper.sh
-/opt/provisioning/karafWrapper.sh
+sleep 60
+sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8101 admin@localhost 'source http://localhost:8980/smnnepo/opennms-setup.karaf'
+#sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8101 admin@localhost 'features:install sample-storage-rrd'

@@ -44,4 +44,5 @@ fi
 
 # register with "central" opennms
 chmod +x /opt/provisioning/karafWrapper.sh
-/opt/provisioning/karafWrapper.sh $1
+sleep 60 # we have to wait until the karaf port is available. This may take a while
+sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost 'source file:///opt/provisioning/smnnepo-setup.karaf admin admin http://192.168.0.2:8980 store$1'
