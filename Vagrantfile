@@ -14,12 +14,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # The NOC OpenNMS instance
   config.vm.define "opennms" do |opennms|
     opennms.vm.box = "ubuntu/trusty64"
+    opennms.vm.hostname = "noc-opennms"
 
     # Assign the VM to the NOC network
     opennms.vm.network "private_network", ip: "192.168.0.2", intnet:"noc"
     opennms.vm.network "forwarded_port", guest: 8980, host: 8980
 
-    config.vm.provider "virtualbox" do |vb|
+    opennms.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-opennms"
       # OpenNMS needs more than 1GB RAM
       vb.customize ["modifyvm", :id, "--memory", "2048"]
@@ -33,6 +34,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # The routing infrastructure
   config.vm.define "router" do |router|
     router.vm.box = "ubuntu/trusty64"
+    router.vm.hostname = "noc-router"
 
     # Assign the VM to the NOC network
     router.vm.network "private_network", ip: "192.168.0.1", intnet:"noc"
@@ -42,7 +44,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       router.vm.network "private_network", ip: "192.168.#{i}.1", intnet:"store-#{i}"
     end
 
-    config.vm.provider "virtualbox" do |vb|
+    router.vm.provider "virtualbox" do |vb|
       vb.name = "smnnepo-gruslab-router"
       vb.customize ["modifyvm", :id, "--memory", "128"]
     end
@@ -56,13 +58,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Create one minion per store
     config.vm.define "store#{i}-minion" do |minion|
       minion.vm.box = "ubuntu/trusty64"
+      minion.vm.hostname = "store#{i}-minion"
 
       # Assign the VM to the store-specific network
       minion.vm.network "private_network", ip: "192.168.#{i}.2", intnet:"store-#{i}"
 
-      config.vm.provider "virtualbox" do |vb|
+      minion.vm.provider "virtualbox" do |vb|
         vb.name = "smnnepo-gruslab-store#{i}-minion"
-        vb.customize ["modifyvm", :id, "--memory", "256"]
+        vb.customize ["modifyvm", :id, "--memory", "512"]
       end
 
       # Start the provisioning
@@ -75,11 +78,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Create the node
       config.vm.define "store#{i}-node#{a}" do |node|
         node.vm.box = "ubuntu/trusty64"
+        node.vm.hostname = "store#{i}-node#{a}"
 
         # Assign the VM to the store-specific network
         node.vm.network "private_network", ip: "192.168.#{i}.#{2+a}", intnet:"store-#{i}"
 
-        config.vm.provider "virtualbox" do |vb|
+        node.vm.provider "virtualbox" do |vb|
           vb.name = "smnnepo-gruslab-store#{i}-node#{a}"
           vb.customize ["modifyvm", :id, "--memory", "128"]
         end
