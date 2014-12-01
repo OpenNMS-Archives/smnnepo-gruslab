@@ -14,9 +14,15 @@ echo "JDK Directory:"${JDK_DIR}
 echo "Download location:"${DOWNLOAD_URL}
 echo "OpenNMS Release:"${OPENNMS_RELEASE}
 
-# we need an opennms tar.gz file
+# we need an opennms.tar.gz file
 if [ ! -f /opt/provisioning/opennms.tar.gz ]; then
     echo "There is no opennms.tar.gz file located in /opt/provisioning."
+    exit 1
+fi
+
+# we need a smnnepo.war file
+if [ ! -f /opt/provisioning/smnnepo.war ]; then
+    echo "There is no smnnepo.war file located in /opt/provisioning."
     exit 1
 fi
 
@@ -44,51 +50,7 @@ apt-get update;
 apt-get install -y tree vim
 apt-get install -y jicmp jicmp6
 apt-get install -y openjdk-7-jre
-
-
-
-# TODO this is the old way of installing debian packages manually. I keep it for now, but it may be removed later
-#if [ $LOCAL_SETUP == 1 ]; then
-#    echo "Installing OpenNMS from local debian packages"
-#    apt-get install -y libdbd-pg-perl libdbi-perl libgetopt-mixed-perl
-#    #apt-get install -y default-mta # TODO do we need this?
-#    apt-get install -y heirloom-mailx
-#
-#    dpkg -i libopennms-java_*_all.deb
-#    dpgk -i libopennmsdeps-java_*_all.deb
-#
-#    dpkg -i opennms-common_*_all.deb
-#    dpkg -i opennms-contrib_*_all.deb
-#    #dpkg -i opennms-db_*_.deb # we do not need this to be installed
-#    dpkg -i opennms-doc_*_all.deb
-#    dpkg -i opennms-jmx-config-generator_*_all.deb
-#    dpkg -i opennms-server_*_all.deb
-#    dpkg -i opennms-webapp-jetty_*_all.deb
-#    dpkg -i opennms-ncs_*_all.deb
-#    dpkg -i opennms-plugin-protocol-radius_*_all.deb
-#    dpkg -i opennms-plugin-protocol-xml_*_all.deb
-#    dpkg -i opennms-plugin-protocol-xmp_*_all.deb
-#    dpkg -i opennms-plugin-protocol-cifs_*_all.deb
-#    dpkg -i opennms-plugin-protocol-dhcp_*_all.deb
-#    dpkg -i opennms-plugin-provisioning-dns_*_all.deb
-#    dpkg -i opennms-plugin-provisioning-link_*_all.deb
-#    dpkg -i opennms-plugin-provisioning-map_*_all.deb
-#    dpkg -i opennms-plugin-provisioning-rancid_*_all.deb
-#    dpkg -i opennms-plugin-provisioning-snmp-asset_*_all.deb
-#    dpkg -i opennms-plugin-provisioning-snmp-hardware-inventory_*_all.deb
-#    dpkg -i opennms-plugin-ticketer-jira_*_all.deb
-#    dpkg -i opennms-plugin-ticketer-otrs_*_all.deb
-#    dpkg -i opennms-plugin-ticketer-rt_*_all.deb
-#    dpkg -i opennms-plugin-collector-vtdxml-handler_*_all.deb
-#    dpkg -i opennms-plugin-collector-juniper-tca_*_all.deb
-#    dpkg -i opennms-plugins_*_all.deb
-#    dpkg -i opennms_*_all.deb
-
-#else
-#    apt-get install -y opennms
-#    echo "Not yet implemented"
-#    exit 3
-#fi
+apt-get install -y sshpass
 
 # Install and Configure Postgresql
 apt-get install -y postgresql postgresql-contrib
@@ -115,5 +77,15 @@ tar xvf /opt/provisioning/opennms.tar.gz -C ${OPENNMS_HOME}
 ${OPENNMS_HOME}/bin/runjava -S ${JAVA_HOME}
 ${OPENNMS_HOME}/bin/install -dis
 
+# Copy the smnnepo server components to opennms
+cp /opt/provisioning/smnnepo.war ${OPENNMS_HOME}/jetty-webapps
+
+# Overwrite some default config parameters
+cp /opt/provisioning/opennms.conf ${OPENNMS_HOME}/etc
+
 # Start OpenNMS
-${OPENNMS_HOME}/bin/opennms -Q start
+${OPENNMS_HOME}/bin/opennms start
+
+# Setup Minion Server
+chmod +x /opt/provisioning/karafWrapper.sh
+/opt/provisioning/karafWrapper.sh
