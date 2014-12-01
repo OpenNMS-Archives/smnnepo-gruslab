@@ -1,5 +1,8 @@
 = Gru's Lab
+:ascii-ids:
+:encoding: UTF-8
 :icons: font
+:numbered:
 
 Gru's Lab is a testing and demonstration environment for +SMNepO+.
 It simulates a complex network with a central +OpenNMS+ instance and multiple sites having seperated infrastructure and services.
@@ -30,11 +33,12 @@ Each node must run
   * send traps to NOC
 
 == Technical overview
-The environment is simulated virtual machines controlled by http://vagrantup.com[vagrant].
-Vagrant is responsible for creating and provisioning the machines and create and wire-up the virtual network.
+The environment is simulated with virtual machines controlled by http://vagrantup.com[vagrant].
+Vagrant is responsible for creating and provisioning the machines.
+It also creates and wires up the virtual network.
 
 To simulate the network, internal-only networks between the virtual machines are used.
-These networks are not accesible from the host and allow isulation of the transmited data.
+These networks are not accessible from the host and allow isolation of the transmitted data.
 
 For wiring the different networks, a special virtual machine called +router+ is used.
 The router is responsible for passing traffic between the networks.
@@ -72,14 +76,18 @@ The IPs are:
 == Network overview
 The +core+ network contains the central +OpenNMS+ instance and is reachable by all sites via the +router+.
 
-For each site, a seperate site network exists.
-These networks contains a +SMNnepO+ +Minion+ instance which is able to communicate with the central +OpenNMS+ instance via the +router+.
+For each store, a separate store network exists.
+These networks contains a +SMNnepO Minion+ instance which is able to communicate with the central +OpenNMS+ instance via the +router+.
 
 == Preparation
 
 === OpenNMS VM
 In order to get the OpenNMS VM to work it is required that you know how to build OpenNMS from source.
 If you do not know how to do this, go link:http://www.opennms.org/wiki/Developing_with_Git[here]
+
+[NOTE]
+You have to checkout branch +jira/PJSM-229+.
+TODO -> Change this to +pjsm/2.0+ after the branch was merged.
 
 Run this to do a clean build and assembly of OpenNMS
 
@@ -94,8 +102,25 @@ cp ~/dev/opennms/target/opennms-<version>.tar.gz ~/dev/smnnepo-gruslab/opennms/o
 ----
 
 [NOTE]
-The target file name must be `opennms.tar.gz`
+The target file name must be +opennms.tar.gz+
 
+You also have to compile/build the +OpenNMS SMNnepO+ project.
+
+[NOTE]
+You have to checkout branch +jira/PJSM-229+
+TODO this can be removed after this branch was merged.
+
+Simply invoke
+
+----
+mvn clean install -DskipTests
+----
+
+And after that copy the generated smnnepo.war file to opennms, e.g.
+
+----
+cp ~/dev/smnnepo/sample-repo-webapp/target/smnnepo.war ~/dev/smnnepo-grulab/opennms/smnnepo.war
+----
 
 == Usage
 NOTE: All commands must be executed from the project folder.
@@ -116,13 +141,16 @@ vagrant up router
 etc.
 ----
 
+The OpenNMS Web UI is forwarded to your host system by default --> http://localhost:8980/opennms
+If you have a service running on that port, you should that service or change the host port in the +Vagrantfile+.
 
-=== Stoping
+=== Stopping
 To shut down all machines from the lab, the following command can be used:
 
 ----
-vagrant destroy -f
+vagrant destroy -f <1>
 ----
+<1> *-f* indicates force and does not ask if you really want to destroy all virtual machines.
 
 To stop individual virtual machines, use the following command:
 
@@ -131,3 +159,21 @@ vagrant destroy -f opennms
 vagrant destroy -f router
 etc.
 ----
+
+== TODO/Open Issues
+
+ * Currently the readme refers to +jira/PJSM-229+ branch but should refer to +pjsm/2.0+ (OpenNMS) or +development/master+ (SMNNEPO)
+ * provisioning of the OpenNMS VM seems to work, except the download of the opennms-setup.karaf file from the local OpenNMS.
+   I always get a ssh error.
+   However if I connect to the vm and manually run +ssh -p 8101 admin@localhost "source http://localhost:8980/smnnepo/opennms-setup.karaf"+ it works.
+   We have to fix this.
+ * The same is for the minion.
+ * Merge with +fooker/playground+
+ * Make all Stores have the same ip address range (192.168.X.X)
+ * finish all tasks found by a search for +TODO+
+
+== Limitations
+
+At this point there are a few limitations to consider.
+
+ * The minion does not run several apache karaf instances. It runs all in one apache karaf instance and therefore uses a different `smnnepo-setup.karaf` file than the original `SMNnepO`.
