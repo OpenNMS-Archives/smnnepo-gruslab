@@ -18,19 +18,57 @@ if [[ ! ( -e "Vagrantfile" && -d "verify" ) ]]; then
 	exit 1
 fi
 
+# Parse command line arguments
+if [[ "${#}" -gt 1 ]]; then
+	echo "Too many arguments." >&2
+	exit 1
+
+elif [[ "${#}" -eq 1 ]]; then
+	FILTER="${1}"
+
+else
+	FILTER="*"
+fi
+
 # Initialize stats
 STAT_TOTAL_EXEC=0
 STAT_TOTAL_FAIL=()
 
+# Initialize list for collecting failed tests
 FAILED_TESTS=""
 
 # Walk over all defined machines
 while read VM VM_STATUS; do
+	if [[ "${VM}" != ${FILTER} ]]; then
+		continue
+	fi
 
-	echo -e "\e[90m+- \e[39m${VM}"
 
+	echo -e "\e[90m+--O \e[39m${VM}"
+
+	# Fail fast if machine is not running
 	if [[ "${VM_STATUS}" != 'running' ]]; then
-		echo -e "\e[90m| o- \e[39m\e[01m[\e[93m??\e[39m]\e[21m machine is not running: ${VM}"
+		echo -e "\e[90m|  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m machine is not running: ${VM}"
+		continue
+	fi
+
+	# Collect specs for current machine
+	SPECS=()
+	while read SPEC; do
+		# Skip foler if folders name is not matchin VMs name
+		if [[ "${VM}" != ${SPEC} ]]; then
+			continue
+		fi
+
+		SPECS+=("${SPEC}")
+	done < <(
+		ls -1 "verify/"
+	)
+
+	# Fail fast if no spacs match the machines
+	if [[ "${#SPECS[@]}" -eq 0 ]]; then
+		# Print warning if no specs match the VM
+		echo -e "\e[90m|  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m No specs matching this machine"
 		continue
 	fi
 
@@ -39,22 +77,28 @@ while read VM VM_STATUS; do
 	STAT_SPECS_FAIL=()
 
 	# Find spec folders matching the VM name
-	while read SPEC; do
-		
-		# Skip foler if folders name is not matchin VMs name
-		if [[ ! ( "verify/${SPEC}" && "${VM}" == ${SPEC} ) ]]; then
+	for SPEC in "${SPECS[@]}"; do
+
+		echo -e "\e[90m|  +--O \e[39m${SPEC}"
+
+		# Collect tests for current spec
+		readarray -t TESTS < <(
+			ls -1 "verify/${SPEC}/"
+		)
+
+		# Fail fast if spec has no tests
+		if [[ "${#TESTS[@]}" -eq 0 ]]; then
+			echo -e "\e[90m|  |  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m No tests defined for spec"
 			continue
 		fi
-
-		echo -e "\e[90m|  +- \e[39m${SPEC}"
 
 		# Initialize stats
 		STAT_TESTS_EXEC=0
 		STAT_TESTS_FAIL=()
 		
 		# Find all tests in spec
-		while read TEST; do
-			echo -e -n "\e[90m|  |  o- \e[39m\e[01m[  ]\e[21m ${VM}/${SPEC}/${TEST}\r"
+		for TEST in "${TESTS[@]}"; do
+			echo -e -n "\e[90m|  |  +- \e[39m\e[01m[  ]\e[21m ${TEST}\r"
 			
 			# Update execution stats
 			((STAT_TOTAL_EXEC++))
@@ -70,12 +114,12 @@ while read VM VM_STATUS; do
 
 			# Check result
 			if [[ "${?}" -eq 0 ]]; then
-				echo -e "\e[90m|  |  o- \e[39m\e[01m[\e[92m++\e[39m]\e[21m"
+				echo -e "\e[90m|  |  +- \e[39m\e[01m[\e[92m++\e[39m]\e[21m"
 
 			else
-				echo -e "\e[90m|  |  o- \e[39m\e[01m[\e[91m!!\e[39m]\e[21m"
+				echo -e "\e[90m|  |  +- \e[39m\e[01m[\e[91m!!\e[39m]\e[21m"
 				while read LINE; do
-					echo -e "\e[90m|  |  |  \e[39m   :\e[91m ${LINE}\e[39m"
+					echo -e "\e[90m|  |  | \e[39m   :\e[91m ${LINE}\e[39m"
 				done <<< "${OUTPUT}"
 				
 				# Update execution stats
@@ -83,36 +127,24 @@ while read VM VM_STATUS; do
 				STAT_SPECS_FAIL+=("${SPEC}/${TEST}")
 				STAT_TESTS_FAIL+=("${TEST}")
 			fi
-		done < <(
-			ls -1 "verify/${SPEC}/"
-		)
+		done
 
-		if [[ "${STAT_TESTS_EXEC}" -eq 0 ]]; then
-			# Print warning if spac has no tests defined
-			echo -e "\e[90m|  |  \\- \e[39m\e[01m[\e[93m??\e[39m]\e[21m No tests defined for spec"
-
-		elif [[ "${#STAT_TESTS_FAIL[@]}" -gt 0 ]]; then
-			# Print warning if some tests failed
-			echo -e "\e[90m|  |  \\- \e[39m\e[01m[\e[91m!!\e[39m]\e[21m Some tests failed: ${#STAT_TESTS_FAIL[@]}/${STAT_TESTS_EXEC}"
+		if [[ "${#STAT_TESTS_FAIL[@]}" -eq 0 ]]; then
+			echo -e "\e[90m|  |  \\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All test succeeded: ${STAT_TESTS_EXEC}"
+		
 		else
-
-			echo -e "\e[90m|  |  \\- \e[39m\e[01m[\e[92m++\e[39m]\e[21m All test succeeded: ${STAT_TESTS_EXEC}"
+			# Print warning if some tests failed
+			echo -e "\e[90m|  |  \\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: ${#STAT_TESTS_FAIL[@]}/${STAT_TESTS_EXEC}"
 		fi
 
-	done < <(
-		ls -1 "verify/"
-	)
+	done
 
-	if [[ "${STAT_SPECS_EXEC}" -eq 0 ]]; then
-		# Print warning if no specs match the VM
-		echo -e "\e[90m|  \\- \e[39m\e[01m[\e[93m??\e[39m]\e[21m No tests/specs defined for machine"
-
-	elif [[ "${#STAT_SPECS_FAIL[@]}" -gt 0 ]]; then
+	if [[ "${#STAT_SPECS_FAIL[@]}" -gt 0 ]]; then
 		# Print warning if some tests failed
-		echo -e "\e[90m|  \\- \e[39m\e[01m[\e[91m!!\e[39m]\e[21m Some tests failed: ${#STAT_SPECS_FAIL[@]}/${STAT_SPECS_EXEC}"
+		echo -e "\e[90m|  \\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: ${#STAT_SPECS_FAIL[@]}/${STAT_SPECS_EXEC}"
 
 	else
-		echo -e "\e[90m|  \\- \e[39m\e[01m[\e[92m++\e[39m]\e[21m All tests succeeded: ${STAT_SPECS_EXEC}"
+		echo -e "\e[90m|  \\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All tests succeeded: ${STAT_SPECS_EXEC}"
 	fi
 
 done < <(
@@ -124,12 +156,12 @@ done < <(
 )
 
 if [[ "${#STAT_SPECS_FAIL[@]}" -gt 0 ]]; then
-	echo -e "\e[90m\\- \e[39m\e[01m[\e[91m!!\e[39m]\e[21m Some tests failed: ${#STAT_TOTAL_FAIL[@]}/${STAT_TOTAL_EXEC}"
+	echo -e "\e[90m\\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: ${#STAT_TOTAL_FAIL[@]}/${STAT_TOTAL_EXEC}"
 
 	for FAIL in "${STAT_TOTAL_FAIL[@]}"; do
 		echo -e "\e[90m   \e[39m   : \e[91m${FAIL}\e[39m"
 	done
 
 else
-	echo -e "\e[90m\\- \e[39m\e[01m[\e[92m++\e[39m]\e[21m All tests succeeded: ${STAT_TOTAL_EXEC}"
+	echo -e "\e[90m\\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All tests succeeded: ${STAT_TOTAL_EXEC}"
 fi
