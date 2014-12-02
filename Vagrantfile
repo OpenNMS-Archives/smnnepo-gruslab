@@ -46,11 +46,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Start the provisioning
     opennms.vm.synced_folder "provisioning/noc/opennms", "/opt/provisioning"
     opennms.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh"
-
-    # Infrastructure tests
-    config.vm.provision "serverspec" do |spec|
-        spec.pattern = 'serverspec/opennms/*.spec.rb'
-    end
   end
 
   STORES.each do |i|
@@ -87,11 +82,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Start the provisioning
       minion.vm.synced_folder "provisioning/store/minion", "/opt/provisioning"
       minion.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh #{i}"
-
-      # Infrastructure tests
-      config.vm.provision "serverspec" do |spec|
-        spec.pattern = 'serverspec/minion/*.spec.rb'
-      end
     end
 
     # Create nodes for each store
