@@ -28,7 +28,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Start the provisioning
     opennms.vm.synced_folder "opennms", "/opt/provisioning"
-    opennms.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh"
+    opennms.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh"
   end
 
   # The routing infrastructure
@@ -51,7 +51,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Start the provisioning
     router.vm.synced_folder "router", "/opt/provisioning"
-    router.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh"
+    router.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh"
   end
 
   STORES.each do |i|
@@ -70,7 +70,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # Start the provisioning
       minion.vm.synced_folder "minion", "/opt/provisioning"
-      minion.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh #{i}"
+      minion.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{i}"
     end
 
     # Create nodes for each store
@@ -90,7 +90,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         # Start the provisioning
         node.vm.synced_folder "node", "/opt/provisioning"
-        node.vm.provision "shell", inline: "sh /opt/provisioning/bootstrap.sh #{i} #{a}"
+        node.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{i} #{a}"
       end
     end
   end

@@ -12,7 +12,7 @@ chmod 755 /etc/network/if-up.d/route-add
 ip route add 192.168.0.0/24 via 192.168.$1.1
 
 # create swap file of 1GB (block size 1MB) due to very low RAM
-/bin/dd if=/dev/zero of=/swapfile bs=1024 count=1048576
+/bin/dd if=/dev/zero of=/swapfile bs=1M count=1K
 /sbin/mkswap /swapfile
 /sbin/swapon /swapfile
 /bin/echo '/swapfile          swap            swap    defaults        0 0' >> /etc/fstab
