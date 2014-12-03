@@ -7,14 +7,20 @@ KARAF_DOWNLOAD_URL=http://mirror.synyx.de/apache/karaf/${KARAF_VERSION}
 
 echo "STORE $1 MINION BOOTSTRAPPING!!!!!"
 
+# No questions from apt
+export DEBIAN_FRONTEND=noninteractive
+
 # Configure routes
 cat > /etc/network/if-up.d/route-add << EOF
 #!/bin/sh
-ip route add 192.168.0.0/24 via 192.168.$1.1
+ip route add 10.10.10.0/24 via 192.168.0.254
+ip route add 172.16.0.0/24 via 192.168.0.254
 EOF
 
 chmod 755 /etc/network/if-up.d/route-add
-ip route add 192.168.0.0/24 via 192.168.$1.1
+
+ip route add 10.10.10.0/24 via 192.168.0.254
+ip route add 172.16.0.0/24 via 192.168.0.254
 
 # Install
 apt-get update
@@ -91,4 +97,4 @@ if [ "${SUCCESS}" != 'yep' ]; then
 fi
 
 # register with "central" opennms
-sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost 'source file:///opt/provisioning/smnnepo-setup.karaf admin admin http://192.168.0.2:8980 store$1'
+sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost 'source file:///opt/provisioning/smnnepo-setup.karaf admin admin http://172.16.0.253:8980 store$1'

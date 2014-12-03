@@ -1,6 +1,9 @@
 /.vagrant
+
 .idea
 *.iml
+
 .*.swp
-opennms/*.tar.gz
-opennms/*.war
+
+provisioning/noc/opennms/*.tar.gz
+provisioning/noc/opennms/*.war

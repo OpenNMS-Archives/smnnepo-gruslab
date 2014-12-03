@@ -13,8 +13,8 @@ The following figure describes the test scenario to simulate.
 image:images/overview.png[Functional Overview]
 
 === The Network Operation Center (NOC)
- * Runs an OpenNMS instance
- * Uses ActiveMQ as a messaging server
+ * Runs an +OpenNMS+ instance
+ * Uses +ActiveMQ+ as a messaging server
 
 === The Store
  * Runs up to 10 nodes
@@ -40,44 +40,63 @@ It also creates and wires up the virtual network.
 To simulate the network, internal-only networks between the virtual machines are used.
 These networks are not accessible from the host and allow isolation of the transmitted data.
 
-For wiring the different networks, a special virtual machine called +router+ is used.
-The router is responsible for passing traffic between the networks.
+There is a network for the NOC containing the +OpenNMS+ installation and a network
+for each store containing the +SMNnepO Minion+ and some nodes.
 
 The following figure describes this.
 
 image:images/overview2.png[Technical Overview]
 
 === OpenNMS VM
-The OpenNMS VM is running OpenNMS and the dominion part.
+The OpenNMS VM is running +OpenNMS+ and the +SMNnepO Dominion+ part.
 
- * The IP is : 192.168.0.2
+=== The transfer network
+The transfer network is used to connect the stores to the NOC. It's a bridge
+connecting the routers for each side and can be seen as the public internet.
+
+The IP range used for the transfer network is:
+
+  10.10.10.0/24
 
 
-=== Router VM
-The router VM combines the store switches and the NOC.
+=== The NOC
+The NOC contains the central OpenNMS instance 
 
-The IPs are:
+The IP range used for the NOC network is:
 
- * 192.168.0.1 Switch to OpenNMS (NOC)
- * 192.168.1.1 to 192.168.n.1 (for the stores)
+  172.16.0.0/24
+
+The IP of the NOC router is:
+
+  172.16.0.254 inside
+  10.10.10.254 outside
+
+The whole network is reachable from the transfer network.
+
+The Machine running the OpenNMS instance and the OpenNMS dominion has the following IP:
+
+  172.16.0.253
 
 
 === Store
-The store is represented by N node VMs and one Minion VM.
-The IPs are:
+A store consists of a router connecting the store with the transfer network, a
+OpenNMS minion VM and N nodes providing data collection targets.
 
- * store 1: node1 - node 10, 192.168.1.3 - 192.168.1.12
- * store 1: switch: 192.168.1.1
- * store 1: minion: 192.168.1.2
- * store 2: node1 - node 10, 192.168.2.3 - 192.168.2.12
- * store 2: switch: 192.168.2.1
- * store 2: minion: 192.168.2.2
+The IP range used for each store is:
 
-== Network overview
-The +core+ network contains the central +OpenNMS+ instance and is reachable by all sites via the +router+.
+  192.168.0.0/24
 
-For each store, a separate store network exists.
-These networks contains a +SMNnepO Minion+ instance which is able to communicate with the central +OpenNMS+ instance via the +router+.
+Whereas each store has the same address range.
+
+The public IP of the store router is:
+
+  192.168.0.254 inside
+  10.10.10.n    outside - n is the number of the store
+
+The Machine running the +SMNnepO Minion+ has the following IP:
+
+  192.168.1.253
+
 
 == Preparation
 
@@ -97,7 +116,7 @@ Run this to do a clean build and assembly of OpenNMS
 Copy the generated opennms-<version>.tar.gz file to opennms, e.g.
 
 ----
-cp ~/dev/opennms/target/opennms-<version>.tar.gz ~/dev/smnnepo-gruslab/opennms/opennms.tar.gz
+cp ~/dev/opennms/target/opennms-<version>.tar.gz ~/dev/smnnepo-gruslab/provisioning/noc/opennms/opennms.tar.gz
 ----
 
 [NOTE]
@@ -117,12 +136,19 @@ mvn clean install -DskipTests
 And after that copy the generated smnnepo.war file to opennms, e.g.
 
 ----
-cp ~/dev/smnnepo/sample-repo-webapp/target/smnnepo.war ~/dev/smnnepo-gruslab/opennms/smnnepo.war
+cp ~/dev/smnnepo/sample-repo-webapp/target/smnnepo.war ~/dev/smnnepo-grulab/provisioning/noc/opennms/smnnepo.war
 ----
 
 == Usage
 NOTE: All commands must be executed from the project folder.
 
+=== Status
+
+To see which virtual machines are available, use:
+
+----
+vagrant status
+----
 
 === Starting
 To start the whole lab with all machines, the following command can be used:
@@ -139,13 +165,7 @@ vagrant up router
 etc.
 ----
 
-To see which virtual machines are available, use:
-
-----
-vagrant status
-----
-
-The OpenNMS Web UI is forwarded to your host system by default --> http://localhost:8980/opennms
+The OpenNMS Web UI is forwarded to your host system by default to http://localhost:8980/opennms.
 If you have a service running on that port, you should stop that service or change the host port in the link:Vagrantfile[Vagrantfile].
 
 === Stopping
@@ -163,6 +183,15 @@ vagrant destroy -f opennms
 vagrant destroy -f router
 etc.
 ----
+
+
+=== Verification
+Part of the project is a verification script. It connects to each VM managed by
+vagrant and executes test scripts.
+
+To execute all tests, execute the following command:
+
+  ./verify.sh
 
 == TODO/Open Issues
 

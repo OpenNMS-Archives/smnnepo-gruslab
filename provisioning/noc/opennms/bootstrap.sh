@@ -8,12 +8,15 @@ JAVA_HOME="/opt/java/oracle/${JDK_DIR}"
 JAVA_BIN="${JAVA_HOME}/bin/java"
 LOCAL_SETUP=1
 
-echo "OPENNMS BOOTSTRAPPING!!!!!"
+echo "NOC OPENNMS BOOTSTRAPPING!!!!!"
 echo "OPENNMS HOME:"${OPENNMS_HOME}
 echo "JDK ZIP:"${JDK_ZIP}
 echo "JDK Directory:"${JDK_DIR}
 echo "Download location:"${DOWNLOAD_URL}
 echo "OpenNMS Release:"${OPENNMS_RELEASE}
+
+# No questions from apt
+export DEBIAN_FRONTEND=noninteractive
 
 # we need an opennms.tar.gz file
 if [ ! -f /opt/provisioning/opennms.tar.gz ]; then
@@ -26,6 +29,16 @@ if [ ! -f /opt/provisioning/smnnepo.war ]; then
     echo "There is no smnnepo.war file located in /opt/provisioning."
     exit 1
 fi
+
+# Configure routes
+cat > /etc/network/if-up.d/route-add << EOF
+#!/bin/sh
+ip route add 10.10.10.0/24 via 172.16.0.254
+EOF
+
+chmod 755 /etc/network/if-up.d/route-add
+
+ip route add 10.10.10.0/24 via 172.16.0.254
 
 # create swap file of 2GB (block size 1MB)
 /bin/dd if=/dev/zero of=/swapfile bs=1M count=2K
