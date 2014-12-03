@@ -1,5 +1,8 @@
 = Gru's Lab
+:ascii-ids:
+:encoding: UTF-8
 :icons: font
+:numbered:
 
 Gru's Lab is a testing and demonstration environment for +SMNepO+.
 It simulates a complex network with a central +OpenNMS+ instance and multiple sites having seperated infrastructure and services.
@@ -10,8 +13,8 @@ The following figure describes the test scenario to simulate.
 image:images/overview.png[Functional Overview]
 
 === The Network Operation Center (NOC)
- * Runs an OpenNMS instance
- * Uses ActiveMQ as a messaging server
+ * Runs an +OpenNMS+ instance
+ * Uses +ActiveMQ+ as a messaging server
 
 === The Store
  * Runs up to 10 nodes
@@ -30,19 +33,22 @@ Each node must run
   * send traps to NOC
 
 == Technical overview
-The environment is simulated virtual machines controlled by http://vagrantup.com[vagrant].
-Vagrant is responsible for creating and provisioning the machines and create and wire-up the virtual network.
+The environment is simulated with virtual machines controlled by http://vagrantup.com[vagrant].
+Vagrant is responsible for creating and provisioning the machines.
+It also creates and wires up the virtual network.
 
 To simulate the network, internal-only networks between the virtual machines are used.
-These networks are not accesible from the host and allow isulation of the transmited data.
+These networks are not accessible from the host and allow isolation of the transmitted data.
 
-There is a network for the NOC containing the OpenNMS installation and a network
-for each store containing the OpenNMS minion and some nodes.
+There is a network for the NOC containing the +OpenNMS+ installation and a network
+for each store containing the +SMNnepO Minion+ and some nodes.
 
 The following figure describes this.
 
 image:images/overview2.png[Technical Overview]
 
+=== OpenNMS VM
+The OpenNMS VM is running +OpenNMS+ and the +SMNnepO Dominion+ part.
 
 === The transfer network
 The transfer network is used to connect the stores to the NOC. It's a bridge
@@ -87,7 +93,7 @@ The public IP of the store router is:
   192.168.0.254 inside
   10.10.10.n    outside - n is the number of the store
 
-The Machine running the OpenNMS minion has the following IP:
+The Machine running the +SMNnepO Minion+ has the following IP:
 
   192.168.1.253
 
@@ -98,6 +104,10 @@ The Machine running the OpenNMS minion has the following IP:
 In order to get the OpenNMS VM to work it is required that you know how to build OpenNMS from source.
 If you do not know how to do this, go link:http://www.opennms.org/wiki/Developing_with_Git[here]
 
+[NOTE]
+You have to checkout branch +jira/PJSM-229+.
+TODO -> Change this to +pjsm/2.0+ after the branch was merged.
+
 Run this to do a clean build and assembly of OpenNMS
 
 ----
@@ -107,12 +117,29 @@ Run this to do a clean build and assembly of OpenNMS
 Copy the generated opennms-<version>.tar.gz file to opennms, e.g.
 
 ----
-cp ~/dev/opennms/target/opennms-<version>.tar.gz ~/dev/smnnepo-gruslab/opennms/opennms.tar.gz
+cp ~/dev/opennms/target/opennms-<version>.tar.gz ~/dev/smnnepo-gruslab/provisioning/noc/opennms/opennms.tar.gz
 ----
 
 [NOTE]
-The target file name must be `opennms.tar.gz`
+The target file name must be +opennms.tar.gz+
 
+You also have to compile/build the +OpenNMS SMNnepO+ project.
+
+[NOTE]
+You have to checkout branch +jira/PJSM-229+
+TODO this can be removed after this branch was merged.
+
+Simply invoke
+
+----
+mvn clean install -DskipTests
+----
+
+And after that copy the generated smnnepo.war file to opennms, e.g.
+
+----
+cp ~/dev/smnnepo/sample-repo-webapp/target/smnnepo.war ~/dev/smnnepo-grulab/provisioning/noc/opennms/smnnepo.war
+----
 
 == Usage
 NOTE: All commands must be executed from the project folder.
@@ -133,13 +160,22 @@ vagrant up router
 etc.
 ----
 
+To see which virtual machines are available, use:
 
-=== Stoping
+----
+vagrant status
+----
+
+The OpenNMS Web UI is forwarded to your host system by default --> http://localhost:8980/opennms
+If you have a service running on that port, you should stop that service or change the host port in the link:Vagrantfile[Vagrantfile].
+
+=== Stopping
 To shut down all machines from the lab, the following command can be used:
 
 ----
-vagrant destroy -f
+vagrant destroy -f <1>
 ----
+<1> *-f* indicates force and does not ask if you really want to destroy all virtual machines.
 
 To stop individual virtual machines, use the following command:
 

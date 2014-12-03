@@ -5,4 +5,5 @@
 
 .*.swp
 
-/provisioning/noc/opennms/*.tar.gz
+provisioning/noc/opennms/*.tar.gz
+provisioning/noc/opennms/*.war
