@@ -141,6 +141,12 @@ vagrant up router
 etc.
 ----
 
+To see which virtual machines are available, use:
+
+----
+vagrant status
+----
+
 The OpenNMS Web UI is forwarded to your host system by default --> http://localhost:8980/opennms
 If you have a service running on that port, you should stop that service or change the host port in the link:Vagrantfile[Vagrantfile].
 
