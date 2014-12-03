@@ -13,8 +13,14 @@
 # lot of trubble, regardless if used in production or not.
 
 # Check if CWD is a vagrant project
-if [[ ! ( -e "Vagrantfile" && -d "verify" ) ]]; then
+if [[ ! -e "Vagrantfile" ]]; then
 	echo "Current directory is not a vagrant project" >&2
+	exit 1
+fi
+
+# Check if tests base-folder is available
+if [[ ! -d "verify"  ]]; then
+	echo "Tests base-folder is missing: verify"
 	exit 1
 fi
 
