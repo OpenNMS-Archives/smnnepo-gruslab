@@ -86,8 +86,7 @@ In order to get the OpenNMS VM to work it is required that you know how to build
 If you do not know how to do this, go link:http://www.opennms.org/wiki/Developing_with_Git[here]
 
 [NOTE]
-You have to checkout branch +jira/PJSM-229+.
-TODO -> Change this to +pjsm/2.0+ after the branch was merged.
+You have to checkout branch +pjsm/2.0+.
 
 Run this to do a clean build and assembly of OpenNMS
 
@@ -107,8 +106,7 @@ The target file name must be +opennms.tar.gz+
 You also have to compile/build the +OpenNMS SMNnepO+ project.
 
 [NOTE]
-You have to checkout branch +jira/PJSM-229+
-TODO this can be removed after this branch was merged.
+You have to checkout branch +develop+
 
 Simply invoke
 
@@ -119,7 +117,7 @@ mvn clean install -DskipTests
 And after that copy the generated smnnepo.war file to opennms, e.g.
 
 ----
-cp ~/dev/smnnepo/sample-repo-webapp/target/smnnepo.war ~/dev/smnnepo-grulab/opennms/smnnepo.war
+cp ~/dev/smnnepo/sample-repo-webapp/target/smnnepo.war ~/dev/smnnepo-gruslab/opennms/smnnepo.war
 ----
 
 == Usage
