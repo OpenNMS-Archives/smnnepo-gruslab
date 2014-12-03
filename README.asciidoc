@@ -184,3 +184,12 @@ vagrant destroy -f opennms
 vagrant destroy -f router
 etc.
 ----
+
+
+== Verification
+Part of the project is a verification script. It connects to each VM managed by
+vagrant and executes test scripts.
+
+To execute all tests, execute the following command:
+
+  ./verify.sh
