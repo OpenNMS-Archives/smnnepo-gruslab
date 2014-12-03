@@ -1,16 +1,16 @@
 #! /bin/bash
 
-# This script is used to verify the test lab setup. It executes smal test
-# scripts located in the verify folder for each machine defined in the lab.
+# This script is used to verify the test setup. It executes test scripts
+# located in the verify folder for each machine defined in the lab.
 #
 # The verify folder contains sub-folders, each building a test fixture. The name
 # of the fixture (the folders name) must match the machines name as defined in
 # the vagrant project. To match multiple machines, the fixtures name can contain
 # wildcards (see bash globbing).
 #
-# Disclaimer: Theis script is carefully tailored with great giddines and without
-# any responibility. It is not adaptable or reusabel in any way and will cause a
-# lot of trubble, regardless if used in production or not.
+# Disclaimer: This script is carefully tailored with great giddines and without
+# any responsibility. It is not adaptable or reusabel in any way and will cause a
+# lot of trouble, regardless if used in production or not.
 
 # Check if CWD is a vagrant project
 if [[ ! ( -e "Vagrantfile" && -d "verify" ) ]]; then
