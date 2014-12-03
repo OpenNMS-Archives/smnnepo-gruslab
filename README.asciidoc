@@ -62,7 +62,7 @@ The IP range used for the transfer network is:
 === The NOC
 The NOC contains the central OpenNMS instance 
 
-The IP range used for the NOc network is:
+The IP range used for the NOC network is:
 
   172.16.0.0/24
 
@@ -79,7 +79,7 @@ The Machine running the OpenNMS instance and the OpenNMS dominion has the follow
 
 
 === Store
-A store consists of a router connectiong the store with the transfer network, a
+A store consists of a router connecting the store with the transfer network, a
 OpenNMS minion VM and N nodes providing data collection targets.
 
 The IP range used for each store is:
@@ -142,6 +142,13 @@ cp ~/dev/smnnepo/sample-repo-webapp/target/smnnepo.war ~/dev/smnnepo-grulab/prov
 == Usage
 NOTE: All commands must be executed from the project folder.
 
+=== Status
+
+To see which virtual machines are available, use:
+
+----
+vagrant status
+----
 
 === Starting
 To start the whole lab with all machines, the following command can be used:
@@ -158,13 +165,7 @@ vagrant up router
 etc.
 ----
 
-To see which virtual machines are available, use:
-
-----
-vagrant status
-----
-
-The OpenNMS Web UI is forwarded to your host system by default --> http://localhost:8980/opennms
+The OpenNMS Web UI is forwarded to your host system by default to http://localhost:8980/opennms.
 If you have a service running on that port, you should stop that service or change the host port in the link:Vagrantfile[Vagrantfile].
 
 === Stopping
@@ -184,7 +185,7 @@ etc.
 ----
 
 
-== Verification
+=== Verification
 Part of the project is a verification script. It connects to each VM managed by
 vagrant and executes test scripts.
 
