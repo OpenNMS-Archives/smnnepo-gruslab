@@ -88,7 +88,10 @@ while read VM VM_STATUS; do
 		echo -e "\e[90m|  +--O \e[39m${SPEC}"
 
 		# Collect tests for current spec
-		readarray -t TESTS < <(
+		TESTS=()
+		while read TEST; do
+			TESTS+=("${TEST}")
+		done < <(
 			ls -1 "verify/${SPEC}/"
 		)
 
