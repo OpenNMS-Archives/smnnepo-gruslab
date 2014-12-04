@@ -158,10 +158,10 @@ while read VM VM_STATUS; do
 
 done < <(
 	vagrant status \
-	| tail -n +3 \
-	| head -n -4 \
-	| tr -s ' ' \
-	| cut -d ' ' -f 1-2
+	| awk '
+		NR > 4 + 2	{ print buffer[NR % 4] }
+					{ buffer[NR % 4] = $1 " " $2 }
+	'
 )
 
 if [[ "${#STAT_SPECS_FAIL[@]}" -gt 0 ]]; then
