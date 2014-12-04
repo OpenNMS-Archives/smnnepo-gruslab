@@ -30,6 +30,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Start the provisioning
     router.vm.synced_folder "provisioning/noc/router", "/opt/provisioning"
+    router.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
     router.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{STORES.count}"
   end
 
@@ -50,6 +51,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Start the provisioning
     opennms.vm.synced_folder "provisioning/noc/opennms", "/opt/provisioning"
+    opennms.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
     opennms.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh"
   end
 
@@ -70,6 +72,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # Start the provisioning
       router.vm.synced_folder "provisioning/store/router", "/opt/provisioning"
+      router.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
       router.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{i}"
     end
 
@@ -88,6 +91,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # Start the provisioning
       minion.vm.synced_folder "provisioning/store/minion", "/opt/provisioning"
+      minion.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
       minion.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{i}"
     end
 
@@ -108,6 +112,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         # Start the provisioning
         node.vm.synced_folder "provisioning/store/node", "/opt/provisioning"
+        node.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
         node.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{i} #{a}"
       end
     end

@@ -5,6 +5,8 @@ KARAF_ARCHIVE=apache-karaf-${KARAF_VERSION}.tar.gz
 KARAF_DIR=apache-karaf-${KARAF_VERSION}
 KARAF_DOWNLOAD_URL=http://mirror.synyx.de/apache/karaf/${KARAF_VERSION}
 
+source /opt/provisioning/shared/utils.sh
+
 echo "STORE $1 MINION BOOTSTRAPPING!!!!!"
 
 # No questions from apt
@@ -52,21 +54,7 @@ fi
 /opt/apache/${KARAF_DIR}/bin/start
 
 # we have to wait until the karaf port is available. This may take a while
-# TODO use a function for this code. It is also used in opennms/bootstrap.sh
-SUCCESS='nope'
-for ((TIME=0; TIME<=300; TIME+=5)); do
-    if ss -nltp | grep 8101 > /dev/null; then
-        SUCCESS='yep'
-        echo "Port 8101 available!"
-        break
-    fi
-    echo "Waiting for port 8101 to become available."
-    sleep 5
-done
-if [ "${SUCCESS}" != 'yep' ]; then
-    echo "Port 8101 is not available. It is very likely that karaf was not able to start. Exiting..."
-    exit 1
-fi
+waitForPort 8101
 
 # Register karaf as a service
 sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost << EOF
@@ -79,22 +67,7 @@ update-rc.d karaf-service defaults
 # We have to stop the running karaf and start the service instead
 /opt/apache/${KARAF_DIR}/bin/stop
 service karaf-service start
-
-# TODO use a function for this code. It is also used in opennms/bootstrap.sh
-SUCCESS='nope'
-for ((TIME=0; TIME<=300; TIME+=5)); do
-    if ss -nltp | grep 8101 > /dev/null; then
-        SUCCESS='yep'
-        echo "Port 8101 available!"
-        break
-    fi
-    echo "Waiting for port 8101 to become available."
-    sleep 5
-done
-if [ "${SUCCESS}" != 'yep' ]; then
-    echo "Port 8101 is not available. It is very likely that karaf was not able to start. Exiting..."
-    exit 1
-fi
+waitForPort 8101
 
 # register with "central" opennms
 sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost 'source file:///opt/provisioning/smnnepo-setup.karaf admin admin http://172.16.0.253:8980 store$1'
