@@ -25,6 +25,7 @@ ip route add 172.16.0.0/24 via 192.168.0.254
 # Install
 apt-get update
 apt-get install -y openjdk-7-jre
+apt-get install -y snmp
 apt-get install -y sshpass
 
 # Set JAVA_HOME
