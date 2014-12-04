@@ -49,12 +49,11 @@ while read VM VM_STATUS; do
 		continue
 	fi
 
-
-	echo -e "\e[90m+--O \e[39m${VM}"
+	printf '\e[90m+--O \e[39m%s\n' "${VM}"
 
 	# Fail fast if machine is not running
 	if [[ "${VM_STATUS}" != 'running' ]]; then
-		echo -e "\e[90m|  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m machine is not running: ${VM}"
+		printf '\e[90m|  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m machine is not running: %s\n' "${VM}"
 		continue
 	fi
 
@@ -74,7 +73,7 @@ while read VM VM_STATUS; do
 	# Fail fast if no spacs match the machines
 	if [[ "${#SPECS[@]}" -eq 0 ]]; then
 		# Print warning if no specs match the VM
-		echo -e "\e[90m|  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m No specs matching this machine"
+		printf '\e[90m|  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m No specs matching this machine\n'
 		continue
 	fi
 
@@ -85,7 +84,7 @@ while read VM VM_STATUS; do
 	# Find spec folders matching the VM name
 	for SPEC in "${SPECS[@]}"; do
 
-		echo -e "\e[90m|  +--O \e[39m${SPEC}"
+		printf '\e[90m|  +--O \e[39m%s\n' "${SPEC}"
 
 		# Collect tests for current spec
 		TESTS=()
@@ -97,7 +96,7 @@ while read VM VM_STATUS; do
 
 		# Fail fast if spec has no tests
 		if [[ "${#TESTS[@]}" -eq 0 ]]; then
-			echo -e "\e[90m|  |  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m No tests defined for spec"
+			printf '\e[90m|  |  \\- \e[39m\e[01m<\e[93m??\e[39m>\e[21m No tests defined for spec\n'
 			continue
 		fi
 
@@ -107,7 +106,7 @@ while read VM VM_STATUS; do
 		
 		# Find all tests in spec
 		for TEST in "${TESTS[@]}"; do
-			echo -e -n "\e[90m|  |  +- \e[39m\e[01m[  ]\e[21m ${TEST}\r"
+			printf '\e[90m|  |  +- \e[39m\e[01m[  ]\e[21m %s\r' "${TEST}"
 			
 			# Update execution stats
 			((STAT_TOTAL_EXEC++))
@@ -123,12 +122,12 @@ while read VM VM_STATUS; do
 
 			# Check result
 			if [[ "${?}" -eq 0 ]]; then
-				echo -e "\e[90m|  |  +- \e[39m\e[01m[\e[92m++\e[39m]\e[21m"
+				printf '\e[90m|  |  +- \e[39m\e[01m[\e[92m++\e[39m]\e[21m\n'
 
 			else
-				echo -e "\e[90m|  |  +- \e[39m\e[01m[\e[91m!!\e[39m]\e[21m"
+				printf '\e[90m|  |  +- \e[39m\e[01m[\e[91m!!\e[39m]\e[21m\n'
 				while read LINE; do
-					echo -e "\e[90m|  |  | \e[39m   :\e[91m ${LINE}\e[39m"
+					printf '\e[90m|  |  | \e[39m   :\e[91m %s\e[39m\n' "${LINE}"
 				done <<< "${OUTPUT}"
 				
 				# Update execution stats
@@ -139,21 +138,21 @@ while read VM VM_STATUS; do
 		done
 
 		if [[ "${#STAT_TESTS_FAIL[@]}" -eq 0 ]]; then
-			echo -e "\e[90m|  |  \\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All test succeeded: ${STAT_TESTS_EXEC}"
+			printf '\e[90m|  |  \\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All test succeeded: %d\n' "${STAT_TESTS_EXEC}"
 		
 		else
 			# Print warning if some tests failed
-			echo -e "\e[90m|  |  \\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: ${#STAT_TESTS_FAIL[@]}/${STAT_TESTS_EXEC}"
+			printf '\e[90m|  |  \\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: %d/%d\n' "${#STAT_TESTS_FAIL[@]}" "${STAT_TESTS_EXEC}"
 		fi
 
 	done
 
 	if [[ "${#STAT_SPECS_FAIL[@]}" -gt 0 ]]; then
 		# Print warning if some tests failed
-		echo -e "\e[90m|  \\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: ${#STAT_SPECS_FAIL[@]}/${STAT_SPECS_EXEC}"
+		printf '\e[90m|  \\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: %d/%d\n' "${#STAT_SPECS_FAIL[@]}" "${STAT_SPECS_EXEC}"
 
 	else
-		echo -e "\e[90m|  \\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All tests succeeded: ${STAT_SPECS_EXEC}"
+		printf '\e[90m|  \\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All tests succeeded: %d\n' "${STAT_SPECS_EXEC}"
 	fi
 
 done < <(
@@ -165,12 +164,12 @@ done < <(
 )
 
 if [[ "${#STAT_SPECS_FAIL[@]}" -gt 0 ]]; then
-	echo -e "\e[90m\\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: ${#STAT_TOTAL_FAIL[@]}/${STAT_TOTAL_EXEC}"
+	printf '\e[90m\\- \e[39m\e[01m<\e[91m!!\e[39m>\e[21m Some tests failed: %d/%d\n' "${#STAT_TOTAL_FAIL[@]}" "${STAT_TOTAL_EXEC}"
 
 	for FAIL in "${STAT_TOTAL_FAIL[@]}"; do
-		echo -e "\e[90m   \e[39m   : \e[91m${FAIL}\e[39m"
+		printf '\e[90m   \e[39m   : \e[91m%s\e[39m\n' "${FAIL}"
 	done
 
 else
-	echo -e "\e[90m\\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All tests succeeded: ${STAT_TOTAL_EXEC}"
+	printf '\e[90m\\- \e[39m\e[01m<\e[92m++\e[39m>\e[21m All tests succeeded: %d\n' "${STAT_TOTAL_EXEC}"
 fi
