@@ -8,6 +8,8 @@ JAVA_HOME="/opt/java/oracle/${JDK_DIR}"
 JAVA_BIN="${JAVA_HOME}/bin/java"
 LOCAL_SETUP=1
 
+source /opt/provisioning/shared/utils.sh
+
 echo "NOC OPENNMS BOOTSTRAPPING!!!!!"
 echo "OPENNMS HOME:"${OPENNMS_HOME}
 echo "JDK ZIP:"${JDK_ZIP}
@@ -112,21 +114,8 @@ update-rc.d opennms defaults
 /etc/init.d/opennms start
 
 # we have to wait until the karaf port is available. This may take a while
-# TODO use a function for this code. It is also used in minion/bootstrap.sh
-SUCCESS='nope'
-for ((TIME=0; TIME<=300; TIME+=5)); do
-    if ss -nltp | grep 8101 > /dev/null; then
-        SUCCESS='yep'
-        echo "Port 8101 available!"
-        break
-    fi
-    echo "Waiting for port 8101 to become available."
-    sleep 5
-done
-if [ "${SUCCESS}" != 'yep' ]; then
-    echo "Port 8101 is not available. It is very likely that karaf was not able to start. Exiting..."
-    exit 1
-fi
+waitForPort 8101 || exit 1
+waitForPort 8980 || exit 1
 
 # Setup Minion Server
 sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8101 admin@localhost 'source http://localhost:8980/smnnepo/opennms-setup.karaf'

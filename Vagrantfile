@@ -11,10 +11,10 @@ NODES = (1..2)
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
+  config.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
 
   # The NOC router instance
   config.vm.define "noc-router" do |router|
-    router.vm.box = "ubuntu/trusty64"
     router.vm.hostname = "noc-router"
 
     # Assign the router to the transfer network
@@ -35,7 +35,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # The NOC OpenNMS instance
   config.vm.define "noc-opennms" do |opennms|
-    opennms.vm.box = "ubuntu/trusty64"
     opennms.vm.hostname = "noc-opennms"
 
     # Assign the VM to the NOC network
@@ -75,7 +74,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Create one minion per store
     config.vm.define "store#{i}-minion" do |minion|
-      minion.vm.box = "ubuntu/trusty64"
       minion.vm.hostname = "store#{i}-minion"
 
       # Assign the VM to the store-specific network
@@ -95,7 +93,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     NODES.each do |a|
       # Create the node
       config.vm.define "store#{i}-node#{a}" do |node|
-        node.vm.box = "ubuntu/trusty64"
         node.vm.hostname = "store#{i}-node#{a}"
 
         # Assign the VM to the store-specific network
