@@ -29,10 +29,8 @@ apt-get install -y snmpd
 apt-get install -y snmp #for debug purposes
 
 # configure snmpd
-NODE_IP=$(( $2+2 ))
 cp /opt/provisioning/snmpd.conf.template /etc/snmp/snmpd.conf
-sed -i s/%%STORE%%/$1/g /etc/snmp/snmpd.conf
-sed -i s/%%NODE%%/${NODE_IP}/g /etc/snmp/snmpd.conf
+sed -i s/%%NODE%%/$2/g /etc/snmp/snmpd.conf
 
 # start snmpd service (it is not by default)
 service snmpd start
