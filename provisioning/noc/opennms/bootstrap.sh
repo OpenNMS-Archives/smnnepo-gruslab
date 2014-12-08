@@ -20,7 +20,7 @@ echo "OpenNMS Release:"${OPENNMS_RELEASE}
 # No questions from apt
 export DEBIAN_FRONTEND=noninteractive
 
-we need an opennms.tar.gz file
+# we need an opennms.tar.gz file
 if [ ! -f /opt/provisioning/opennms.tar.gz ]; then
     echo "There is no opennms.tar.gz file located in /opt/provisioning."
     exit 1
@@ -114,7 +114,8 @@ update-rc.d opennms defaults
 /etc/init.d/opennms start
 
 # we have to wait until the karaf port is available. This may take a while
-waitForPort 8101
+waitForPort 8101 || exit 1
+waitForPort 8980 || exit 1
 
 # Setup Minion Server
 sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8101 admin@localhost 'source http://localhost:8980/smnnepo/opennms-setup.karaf'

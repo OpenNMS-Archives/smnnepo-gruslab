@@ -1,7 +1,7 @@
 #!/bin/sh
 
 function waitForPort {
-    SUCCESS='nope'
+    local SUCCESS=
     for ((TIME=0; TIME<=300; TIME+=5)); do
         if checkPort $1; then
             SUCCESS='yep'
@@ -11,12 +11,12 @@ function waitForPort {
         echo "Waiting for port $1 to become available."
         sleep 5
     done
-    if [ "${SUCCESS}" != 'yep' ]; then
+    if [[ -z "${SUCCESS}" ]]; then
         echo "Port $1 is not available. Exiting..."
-        exit 1
+        return 1
     fi
 }
 
 function checkPort {
-    return $(ss -nltp | grep $1 > /dev/null)
+    ss -nltp | grep $1 > /dev/null
 }

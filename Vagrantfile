@@ -11,10 +11,10 @@ NODES = (1..2)
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "ubuntu/trusty64"
+  config.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
 
   # The NOC router instance
   config.vm.define "noc-router" do |router|
-    router.vm.box = "ubuntu/trusty64"
     router.vm.hostname = "noc-router"
 
     # Assign the router to the transfer network
@@ -30,13 +30,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Start the provisioning
     router.vm.synced_folder "provisioning/noc/router", "/opt/provisioning"
-    router.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
     router.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{STORES.count}"
   end
 
   # The NOC OpenNMS instance
   config.vm.define "noc-opennms" do |opennms|
-    opennms.vm.box = "ubuntu/trusty64"
     opennms.vm.hostname = "noc-opennms"
 
     # Assign the VM to the NOC network
@@ -51,7 +49,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Start the provisioning
     opennms.vm.synced_folder "provisioning/noc/opennms", "/opt/provisioning"
-    opennms.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
     opennms.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh"
   end
 
@@ -72,13 +69,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # Start the provisioning
       router.vm.synced_folder "provisioning/store/router", "/opt/provisioning"
-      router.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
       router.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{i}"
     end
 
     # Create one minion per store
     config.vm.define "store#{i}-minion" do |minion|
-      minion.vm.box = "ubuntu/trusty64"
       minion.vm.hostname = "store#{i}-minion"
 
       # Assign the VM to the store-specific network
@@ -91,7 +86,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # Start the provisioning
       minion.vm.synced_folder "provisioning/store/minion", "/opt/provisioning"
-      minion.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
       minion.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{i}"
     end
 
@@ -99,7 +93,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     NODES.each do |a|
       # Create the node
       config.vm.define "store#{i}-node#{a}" do |node|
-        node.vm.box = "ubuntu/trusty64"
         node.vm.hostname = "store#{i}-node#{a}"
 
         # Assign the VM to the store-specific network
@@ -112,7 +105,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
         # Start the provisioning
         node.vm.synced_folder "provisioning/store/node", "/opt/provisioning"
-        node.vm.synced_folder "provisioning/shared", "/opt/provisioning/shared"
         node.vm.provision "shell", inline: "bash /opt/provisioning/bootstrap.sh #{i} #{a}"
       end
     end

@@ -54,7 +54,7 @@ fi
 /opt/apache/${KARAF_DIR}/bin/start
 
 # we have to wait until the karaf port is available. This may take a while
-waitForPort 8101
+waitForPort 8101 || exit 1
 
 # Register karaf as a service
 sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost << EOF
@@ -67,7 +67,7 @@ update-rc.d karaf-service defaults
 # We have to stop the running karaf and start the service instead
 /opt/apache/${KARAF_DIR}/bin/stop
 service karaf-service start
-waitForPort 8101
+waitForPort 8101 || exit 1
 
 # register with "central" opennms
 sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost 'source file:///opt/provisioning/smnnepo-setup.karaf admin admin http://172.16.0.253:8980 store$1'
