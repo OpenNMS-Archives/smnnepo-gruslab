@@ -71,4 +71,4 @@ service karaf-service start
 waitForPort 8101 || exit 1
 
 # register with "central" opennms
-sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost 'source file:///opt/provisioning/smnnepo-setup.karaf admin admin http://172.16.0.253:8980 store$1'
+sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost 'source http://172.16.0.253:8980/smnnepo/smnnepo-setup.karaf admin admin http://172.16.0.253:8980 store${1}'
