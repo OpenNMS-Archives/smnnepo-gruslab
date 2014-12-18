@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?castor class-name="org.opennms.netmgt.collectd.CollectdConfiguration"?>
+<collectd-configuration
+        threads="50">
+
+    <package name="store-template" remote="true">
+        <filter>IPADDR != '0.0.0.0'</filter>
+        <include-range begin="1.1.1.1" end="254.254.254.254"/>
+        <include-range begin="::1" end="ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"/>
+
+        <service name="SNMP" interval="300000" user-defined="false" status="on">
+            <parameter key="collection" value="default"/>
+            <parameter key="thresholding-enabled" value="true"/>
+        </service>
+    </package>
+
+
+    <collector service="SNMP" class-name="org.opennms.netmgt.collectd.SnmpCollector"/>
+    <collector service="WMI" class-name="org.opennms.netmgt.collectd.WmiCollector"/>
+    <collector service="OpenNMS-JVM" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
+    <collector service="VMware-VirtualMachine" class-name="org.opennms.netmgt.collectd.VmwareCollector"/>
+    <collector service="VMware-HostSystem" class-name="org.opennms.netmgt.collectd.VmwareCollector"/>
+    <collector service="VMwareCim-HostSystem" class-name="org.opennms.netmgt.collectd.VmwareCimCollector"/>
+    <collector service="PostgreSQL" class-name="org.opennms.netmgt.collectd.JdbcCollector"/>
+</collectd-configuration>
+

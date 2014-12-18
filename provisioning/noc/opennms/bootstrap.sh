@@ -98,6 +98,7 @@ cp /opt/provisioning/smnnepo.war ${OPENNMS_HOME}/jetty-webapps
 
 # Overwrite some default config parameters
 cp /opt/provisioning/opennms.conf ${OPENNMS_HOME}/etc
+cp /opt/provisioning/config/*.xml ${OPENNMS_HOME}/etc
 
 # set JAVA_HOME in opennms.conf
 cat << EOF | tee -a ${OPENNMS_HOME}/etc/opennms.conf
@@ -120,3 +121,10 @@ waitForPort 8980 || exit 1
 # Setup Minion Server
 sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8101 admin@localhost 'source http://localhost:8980/smnnepo/opennms-setup.karaf'
 #sshpass -p admin ssh -o StrictHostKeyChecking=no -p 8101 admin@localhost 'features:install sample-storage-rrd'
+
+# We have to restart OpenNMS for now, because ActiveMQ is not automatically started
+/etc/init.d/opennms stop
+/etc/init.d/opennms start
+waitForPort 8101 || exit 1
+waitForPort 8980 || exit 1
+waitForPort 61616 || exit 1
