@@ -57,6 +57,9 @@ fi
 # we have to wait until the karaf port is available. This may take a while
 waitForPort 8101 || exit 1
 
+# TODO
+exit 0
+
 # Register karaf as a service
 sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost << EOF
 features:install -v wrapper
