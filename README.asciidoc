@@ -136,7 +136,7 @@ mvn clean install -DskipTests
 And after that copy the generated smnnepo.war file to opennms, e.g.
 
 ----
-cp ~/dev/smnnepo/sample-repo-webapp/target/smnnepo.war ~/dev/smnnepo-grulab/provisioning/noc/opennms/smnnepo.war
+cp ~/dev/smnnepo/sampler-repo-webapp/target/smnnepo.war ~/dev/smnnepo-grulab/provisioning/noc/opennms/smnnepo.war
 ----
 
 == Usage
