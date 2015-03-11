@@ -209,5 +209,4 @@ To execute all tests, execute the following command:
 
 At this point there are a few limitations to consider.
 
- * The minion does not run several apache karaf instances. It runs all in one apache karaf instance and therefore uses a different `smnnepo-setup.karaf` file than the original `SMNnepO`.
  * We use our own +opennms-server.opennmsinit+ script, but we may want to use the official +opennms+ one.

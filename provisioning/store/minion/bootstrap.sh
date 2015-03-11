@@ -24,6 +24,12 @@ chmod 755 /etc/network/if-up.d/route-add
 ip route add 10.10.10.0/24 via 192.168.0.254
 ip route add 172.16.0.0/24 via 192.168.0.254
 
+# create swap file of 2GB (block size 1MB)
+/bin/dd if=/dev/zero of=/swapfile bs=1M count=2K
+/sbin/mkswap /swapfile
+/sbin/swapon /swapfile
+/bin/echo '/swapfile          swap            swap    defaults        0 0' >> /etc/fstab
+
 # Install
 apt-get update
 apt-get install -y openjdk-7-jre
@@ -70,5 +76,32 @@ update-rc.d karaf-service defaults
 service karaf-service start
 waitForPort 8101 || exit 1
 
-# register with "central" opennms
-sshpass -p karaf ssh -o StrictHostKeyChecking=no -p 8101 karaf@localhost "source file:///opt/provisioning/smnnepo-setup.karaf admin admin http://172.16.0.253:8980 store$1"
+# Register with "central" opennms
+export SMNNEPO_HOME="/opt/apache/${KARAF_DIR}"
+export OPENNMS="http://172.16.0.253:8980"
+export USERNAME=admin
+export PASSWORD=admin
+export LOCATION=store$1
+export SCRIPTDIR="$OPENNMS/smnnepo"
+
+echo -n "Configuring root instance: URL: $OPENNMS, Location: $LOCATION: "
+"$SMNNEPO_HOME"/bin/client -a 8101 -r 30 "source" "$SCRIPTDIR/smnnepo-setup.karaf" root "\"$USERNAME\"" "\"$PASSWORD\"" "\"$OPENNMS\"" "\"$LOCATION\""
+
+"$SMNNEPO_HOME"/bin/admin list | grep '^\[' | sed 's#[][/]# #g' | while read LINE; do
+        PORT=`echo "$LINE" | awk '{print $1}'`
+        INSTANCE=`echo "$LINE" | awk '{print $6}'`
+
+        # Configure all instances except root
+        if [ "$INSTANCE" != "root" ]; then
+                echo -n "Configuring subinstance $INSTANCE: "
+                "$SMNNEPO_HOME"/bin/client -r 10 -a $PORT "source" "\"$SCRIPTDIR/smnnepo-setup.karaf\"" $INSTANCE "\"$USERNAME\"" "\"$PASSWORD\"" "\"$OPENNMS\"" "\"$LOCATION\"" >> /tmp/smnnepo.log 2>&1
+                 RETVAL="$?"
+
+                if [ $RETVAL -eq 0 ]; then
+                        echo "OK"
+                else
+                        echo "FAILED. See /tmp/smnnepo.log for details."
+                        exit $RETVAL
+                fi
+        fi
+done
