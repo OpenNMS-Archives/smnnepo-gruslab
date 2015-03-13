@@ -97,7 +97,7 @@ ${OPENNMS_HOME}/bin/install -dis
 cp /opt/provisioning/smnnepo.war ${OPENNMS_HOME}/jetty-webapps
 
 # Overwrite some default config parameters
-cp /opt/provisioning/opennms.conf ${OPENNMS_HOME}/etc
+cp /opt/provisioning/etc/* ${OPENNMS_HOME}/etc/
 
 # set JAVA_HOME in opennms.conf
 cat << EOF | tee -a ${OPENNMS_HOME}/etc/opennms.conf

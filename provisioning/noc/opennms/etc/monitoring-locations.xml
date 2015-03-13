@@ -1,0 +1,10 @@
+<monitoring-locations-configuration xmlns="http://xmlns.opennms.org/xsd/config/monitoring-locations">
+   <locations>
+      <location-def location-name="store1" monitoring-area="store1" polling-package-name="store" collection-package-name="store" geolocation="The OpenNMS Group, Pittsboro, NC" coordinates="35.7174,-79.1619" priority="50">
+         <tags>
+            <tag name="store"/>
+            <tag name="production"/>
+         </tags>
+      </location-def>
+   </locations>
+</monitoring-locations-configuration>
