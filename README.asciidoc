@@ -105,7 +105,7 @@ In order to get the OpenNMS VM to work it is required that you know how to build
 If you do not know how to do this, go link:http://www.opennms.org/wiki/Developing_with_Git[here]
 
 [NOTE]
-You have to checkout branch +pjsm/2.0+.
+You have to checkout branch +develop+.
 
 Run this to do a clean build and assembly of OpenNMS
 
@@ -195,7 +195,7 @@ To execute all tests, execute the following command:
 
 == TODO/Open Issues
 
- * Currently the readme refers to +jira/PJSM-229+ branch but should refer to +pjsm/2.0+ (OpenNMS) or +development/master+ (SMNNEPO)
+ * Currently the readme refers to +jira/PJSM-229+ branch but should refer to +develop+ (OpenNMS) or +development/master+ (SMNNEPO)
  * provisioning of the OpenNMS VM seems to work, except the download of the opennms-setup.karaf file from the local OpenNMS.
    I always get a ssh error.
    However if I connect to the vm and manually run +ssh -p 8101 admin@localhost "source http://localhost:8980/smnnepo/opennms-setup.karaf"+ it works.
